@@ -6,11 +6,12 @@
     <style>
       body, html { margin:0; padding:0; height:100%;}
       #heatmapContainerWrapper { width:100%; height:100%; position:absolute; }
-      #heatmapContainer { width:100%; height:100%;}
+      #heatmapContainer { width: 90%; height: 90%; display: block; margin: auto; }
       h1 { position:absolute; background:white; padding:10px;}
-      img { width: 100%; height: 100%;}
+      img {width: 100%; height: 100%;}
     </style>
     <script src="heatmap.min.js"></script>
+    <script src="jquery.min.js"></script>
   </head>
   <body>
     <div id="heatmapContainerWrapper">
@@ -19,6 +20,11 @@
       </div>
     </div>
     <script>
+
+      var query = "http://0.0.0.0:3000/locations";
+      $.getJSON(query, function(json){
+        console.log(json);
+      });
 
       var heatmap = h337.create({
         container: document.getElementById('heatmapContainer'),
@@ -30,10 +36,13 @@
         scaleRadius: true
       });
 
-      var width = (+window.getComputedStyle(document.body).width.replace(/px/,''));
+      var imageContainer = document.getElementById("heatmapContainer");
+      var width = (+window.getComputedStyle(imageContainer).width.replace(/px/,''));
+      var height = (+window.getComputedStyle(imageContainer).height.replace(/px/,''));
 
-      var height = (+window.getComputedStyle(document.body).height.replace(/px/,''));
-      
+      window.addEventListener("resize", onWindowResize, false);
+
+      console.log("width is: " + width + " and height is: " + height);
       function generate() {
         var dataPoints = [];
         for (var i = 0; i < 30; i++) {
@@ -41,8 +50,8 @@
           var min = 0;
           var t = [];
 
-          var x = (Math.random()* width) >> 0;
-          var y = (Math.random()* height) >> 0;
+          var x = i * 40 //(Math.random()* width) >> 0;
+          var y = height/3;//350//(Math.random()* height) >> 0;
           var c = 100;
           var r = (Math.random()* 50) >> 0;
           
@@ -51,6 +60,12 @@
         // set the datapoint to heatmap instance
         var data = {max: 100, min: 0, data: dataPoints};
         heatmap.setData(data);
+      }
+
+      function onWindowResize() {
+        //imageContainer = document.getElementById("imageContainer");
+        width = (+window.getComputedStyle(imageContainer).width.replace(/px/,''));
+        height = (+window.getComputedStyle(imageContainer).height.replace(/px/,''));
       }
 
       setTimeout(function test() {

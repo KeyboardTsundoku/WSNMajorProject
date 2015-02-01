@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Shopping Mall HeatMap</title>
+    <style>
+      body, html { margin:0; padding:0; height:100%;}
+      #heatmapContainerWrapper { width:100%; height:100%; position:absolute; }
+      #heatmapContainer { width: 90%; height: 90%; display: block; margin: auto; }
+      h1 { position:absolute; background:white; padding:10px;}
+      img { width: 100%; height: 100%; }
+    </style>
+    <script src="heatmap.min.js"></script>
+    <script src="jquery.min.js"></script>
+  </head>
+  <body>
+    <div id="heatmapContainerWrapper">
+      <div id="heatmapContainer">
+        <img src="floorplan.png">
+      </div>
+    </div>
+    <script>
+
+      var query = "/locations";
+      $.getJSON(query, function(json) {
+        init(json);
+      });
+
+      
+      var heatmap = h337.create({
+        container: document.getElementById('heatmapContainer'),
+        gradient: { .1: 'rgba(0,0,0,0)', 0.25: "rgba(0,0,90, .6)", .6: "blue",
+                    .9: "cyan", .95: 'rgba(255,255,255,.4)'},
+        maxOpacity: .7,
+        radius: 0.001,
+        blur: .90,
+        scaleRadius: true
+      });
+
+      function init(sensorLocations) {
+        //console.log(sensorLocations);
+        setTimeout(function test() {
+
+          var now = new Date();
+          var query = "/occupancy/?date=" + now.toISOString();
+          $.getJSON(query, function(json) {
+            generate(json, sensorLocations);
+          });
+
+          setTimeout(test, 800); // change rand value for different intervals
+        }, 200);
+      }
+      
+      var width = (+window.getComputedStyle(document.body).width.replace(/px/,''));
+
+      var height = (+window.getComputedStyle(document.body).height.replace(/px/,''));
+      
+      function generate(sensorData, sensorLocations) {
+        //console.log(sensorLocations);
+        var dataPoints = [];
+        for(var sensor in sensorLocations) {
+          //var max = 100;
+          //var min = 0;
+          //var t = [];
+          //console.log(sensorData.values[sensor-1]);
+          //console.log(sensorLocations[sensor][0] + " : " + sensorLocations[sensor][1]);
+          var x = sensorLocations[sensor][0];
+          var y = sensorLocations[sensor][1];
+          var c = 100;
+          var r = sensorData.values[sensor - 1]; //(Math.random()* 50) >> 0;
+          
+          dataPoint = { x: x, y: y, value: c, radius: r};
+          console.log(dataPoint);
+          dataPoints.push(dataPoint);
+        }
+        // set the datapoint to heatmap instance
+        var data = {max: 100, min: 0, data: dataPoints};
+        //console.log(data);
+        heatmap.setData(data);
+      }
+
+      
+    </script>
+  </body>
+</html>
